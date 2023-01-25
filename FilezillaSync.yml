@@ -1,0 +1,23 @@
+---
+- hosts: "{{ Server_Type }}"
+  order: sorted
+  serial: 1
+  become: yes
+  become_method: runas
+  vars:
+    script_path: "{{ script_path }}"
+    script_name: FilezillaSync.ps1
+    setup_script: FilezillaSync_Setup.ps1
+  collections:
+    - ansible.windows
+  tasks:
+    - name: Copy setup script to remote server
+      win_copy:
+        src: "{{ setup_script }}"
+        dest: "{{ script_path }}/{{ setup_script }}"
+    - name: Copy main script to remote server
+      win_copy:
+        src: "{{ script_name }}"
+        dest: "{{ script_path }}/{{ script_name }}"
+    - name: Run setup script
+      win_command: "powershell.exe -File {{ script_path }}/{{ setup_script }} -path {{ script_path }}"
